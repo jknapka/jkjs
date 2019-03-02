@@ -38,7 +38,10 @@ whose name is specified by a `data-jkspa-js-controller` attribute
 to the HTML element within the `<script>` tag. If no such function
 is named, a default controller function will be used depending
 on the type of HTML tag the editor uses. Currently only text
-`<input>` tags and `<select>` tags are supported as editors.
+`<input>` tags and `<select>` tags are supported as editors using
+the default controller functions. See the `jkspaTextController()`
+and `jkspaSelectController()` functions if you want to implement
+a new controller function.
 
 The controller function binds approporate behavior to the editor's
 HTML to allow changes to be commited to the server via XMLHttpRequest
