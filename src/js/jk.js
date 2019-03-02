@@ -107,8 +107,8 @@ JKJS_FRAMEWORK = {
 			return getTrOrTableAttribFromTD(td,"data-edit-url");
 		}
 
-		// Given a <td> element, find the ID of the rperson object
-		// it is associated with. That ID is encoeed in the data-rp-id
+		// Given a <td> element, find the ID of the server data object
+		// it is associated with. That ID is encoeded in the data-key-id
 		// attribute of the surrounding <tr> element.
 		function getKeyIdFromTD(originalCell) {
 			return getTrAttribFromTd(originalCell,"data-key-id");
