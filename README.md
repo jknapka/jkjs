@@ -43,8 +43,17 @@ on the type of HTML tag the editor uses. Currently only text
 The controller function binds approporate behavior to the editor's
 HTML to allow changes to be commited to the server via XMLHttpRequest
 calls to the URL scheme described above. The result of each such
-call must be JSON that contains the new state of the table.:
+call must be JSON that contains the new state of the table.
 
-After submitting a successful
+After submitting a successful update, the server should return
+whatever JSON data the configured renderer function needs in order
+to render the updated data. Renderer functions may be configured
+by calling `JKJS.registerRefreshFunction(htmlName,your_render_fn)`,
+where `htmlName` is the a name by which the render function will
+be referred to in the `<table data-jkspa-refresh-fn="htmlName">`
+attribute. (That attribute may also be specified at the `<tr>`
+level if different rows require different render functions.) The
+render function is passed the JSON data returned from the server's
+update call.
 
 In the near future I will add a brief example app.
