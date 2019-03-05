@@ -1,16 +1,27 @@
 <!doctype html>
 <html>
 	<head>
-		<title>JKJS Test App</title>
+		<title>JKJS Test App: Order Management</title>
 
-		<!-- Structure of this file:
+		<!--
+	 	This file realizes the single-page app for order management
+	   	in the browser.
+
+		Visit http://localhost:port/spa.html?order_id=42 to manage
+		the test order.
+
+	  	Structure of the body of this file:
 	  		1) A div where the app behavior will occur (id=testapp-content).
-			2) Load Javascript modules the app depends on.
-			3) Custom Javascript code that plugs into the JK framework.
-			4) A Handlebars template to render the app content (id=testapp-order-template).
-			5) Templates for the editor controls used by the JK framework (id=testapp-editors).
+			2) A Handlebars template to render the app content (id=testapp-order-template).
+			3) Templates for the editor controls used by the JK framework (id=testapp-editors).
+			4) Load Javascript modules the app depends on.
+			5) Custom Javascript code that plugs into the JK framework.
 		-->
 	<style>
+	<!--
+	This style ensures that active controls appear with an
+	appropriate cursor and distinctive appearance.
+	-->
 	.jkspa-control {
 		font-style: italic;
 		cursor: pointer;
@@ -21,18 +32,58 @@
 	<body>
 		<h1>JK Javascript Framework Test App</h1>
 
-		<!-- This is the place where we'll render the app's content. -->
+		<!--
+	  	This is the place where we'll render the app's content.
+	    The order is rendered into this div each time an edit
+		is performed, via the showOrder() function defined below.
+		-->
 		<div id="testapp-content"></div>
 
-		<!-- Here is the Handlebars template we use to actually
-	  		render an order. -->
+		<!--
+	  	Here is the Handlebars template we use to actually
+	  	render an order. The entire order is re-rendered from this
+		template each time an edit is performed. To simplify
+		the app, the Handlebars template is compiled programmatically
+		in the script below; this relieves us from having to compile
+		anything before the application is usable.
+		-->
 		<script type="text/x-handlebars-template" id="testapp-order-template">
 			<div class="testapp-order-wrapper">
 				<h1>Order ID {{order_id}}</h1>
-				<table border="1" data-edit-url="/editItem" data-key-name="item_id" data-jkspa-refresh-fn="showOrder">
+
+				<!--
+				This table's data binding is handled by the JK framework.
+				The critical table attributes are:
+					data-edit-url: the base URL to invoke on the server in
+						order to edit a table cell.
+					data-key-name: the name of the query attribute that
+						contains the primary key of the edited item.
+					data-jkspa-refresh-fn: the name of a Javascript function
+						that must be invoked here in the UI to re-render
+						the table after an edit is performed. This name
+						is the first argument to the JKJS_FRAMEWORK.registerRefresnFn()
+						method, which must be called to register the
+						refresh function.
+				-->
+				<table
+					 border="1"
+					 data-edit-url="/editItem"
+					 data-key-name="item_id"
+					 data-jkspa-refresh-fn="showOrder"
+					>
 					<tr><th>Item</th> <th>Quantity</th> <th>Price</th></tr>
 				{{#each items}}
 					<tr data-key-id="{{../order_id}}+{{@index}}">
+						<!--
+						Each editable <td> must have class "jkspa-control".
+						It also needs the following attributes:
+							data-jkspa-control-id: the ID of one of the control
+								templates defined below. This determines which
+								editor is shown when the cell is clicked.
+							data-jkspa-data-attribute: the name of the data
+								attribute to be included in the call to the
+								server URL specified above.
+						-->
 						<td
 							data-jkspa-control-id="testapp-item-control"
 							class="jkspa-control"
@@ -45,16 +96,35 @@
 							data-jkspa-data-attribute="quantity"
 							>
 							{{quantity}}</td>
+
+						<!-- This <td> is not editable, it is computed by
+						the server. -->
 						<td> {{price}}</td>
+
+						<!-- This <td> is not editable; it merely invokes an
+						action on the server to remove this row's item from
+						the order. However, it has the jkspa-control class so
+						that it will be styled consistently with other active
+						controls. -->
 						<td class="jkspa-control" onclick="removeItem({{../order_id}},{{@index}})"> - Remove </td>
 					</tr>
 				{{/each}}
 				</table>
+
+				<!-- This <span>, when clicked, calls the server to add an
+				item to the order. It has class jkspa-control for consistency
+				with other active controls. -->
 				<span class="jkspa-control" onclick="addItem()">+ Add Item</span>
 			</div>
 		</script>
 
-		<!-- Here are the edit controls used by the JK framework. -->
+		<!--
+	 	Here are the edit controls used by the JK framework.
+		When a table cell with class jkspa-control is clicked, its
+		jkspa-control-id attribute indicates a script tag here,
+		whose contents will be used to manifest an editor for
+		the table cell.
+	   	-->
 		<div id="testapp-controls">
 
 			<script type="text/x-jkjs-control" id="testapp-price-control">
@@ -80,7 +150,7 @@
 			</script>
 		</div>
 
-		<!-- Here we load the JK framework, Handlebars, and jQuery, which it
+		<!-- Here we load the JK framework, as well as Handlebars and jQuery, which it
 		  depends upon. -->
 		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 		<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.0/handlebars.min.js"></script>
