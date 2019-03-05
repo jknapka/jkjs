@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+	<head>
+		<title>JKJS Test App</title>
+
+		<!-- Structure of this file:
+	  		1) A div where the app behavior will occur (id=testapp-content).
+			2) Load Javascript modules the app depends on.
+			3) Custom Javascript code that plugs into the JK framework.
+			4) A Handlebars template to render the app content (id=testapp-order-template).
+			5) Templates for the editor controls used by the JK framework (id=testapp-editors).
+		-->
+	<style>
+	.jkspa-control {
+		font-style: italic;
+		cursor: pointer;
+	}
+	</style>
+	</head>
+
+	<body>
+		<h1>JK Javascript Framework Test App</h1>
+
+		<!-- This is the place where we'll render the app's content. -->
+		<div id="testapp-content"></div>
+
+		<!-- Here is the Handlebars template we use to actually
+	  		render an order. -->
+		<script type="text/x-handlebars-template" id="testapp-order-template">
+			<div class="testapp-order-wrapper">
+				<h1>Order ID {{order_id}}</h1>
+				<table border="1" data-edit-url="/editItem" data-key-name="item_id" data-jkspa-refresh-fn="showOrder">
+					<tr><th>Item</th> <th>Quantity</th> <th>Price</th></tr>
+				{{#each items}}
+					<tr data-key-id="{{../order_id}}+{{@index}}">
+						<td
+							data-jkspa-control-id="testapp-item-control"
+							class="jkspa-control"
+							data-jkspa-data-attribute="name"
+							>
+							{{name}}</td>
+						<td
+							data-jkspa-control-id="testapp-price-control"
+							class="jkspa-control"
+							data-jkspa-data-attribute="quantity"
+							>
+							{{quantity}}</td>
+						<td> {{price}}</td>
+						<td class="jkspa-control" onclick="removeItem({{../order_id}},{{@index}})"> - Remove </td>
+					</tr>
+				{{/each}}
+				</table>
+				<span class="jkspa-control" onclick="addItem()">+ Add Item</span>
+			</div>
+		</script>
+
+		<!-- Here are the edit controls used by the JK framework. -->
+		<div id="testapp-controls">
+
+			<script type="text/x-jkjs-control" id="testapp-price-control">
+				<input type="text"
+						data-jkspa-refresh-fn="showOrder">
+				</input>
+			</script>
+
+			<script id="testapp-item-control"
+					type="x-html/x-jkjs-control">
+				<select name="name"
+						class="singleselectfield"
+						data-jkspa-refresh-fn="showOrder">
+					<option value="food">food</option>
+					<option value="drink">drink</option>
+					<option value="toy">toy</option>
+					<option value="book">book</option>
+					<option value="pet_food">pet_food</option>
+					<option value="flowers">flowers</option>
+					<option value="cup">cup</option>
+					<option value="saucer">saucer</option>
+				</select>
+			</script>
+		</div>
+
+		<!-- Here we load the JK framework, Handlebars, and jQuery, which it
+		  depends upon. -->
+		<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.0/handlebars.min.js"></script>
+		<script src="jk.js"></script>
+
+		<!-- Here we put the app-specific Javascript code that plugs
+		  into the JK framework. Of course, this could be an external
+		  .js file if desired. -->
+		<script>
+
+		// Holds the ID of the order being viewed.
+		let order_id = null;
+
+		// Holds the compiled Handlebars template for order rendering.
+		let order_template = null;
+
+		// Render the current order into the testapp-content div.
+		function showOrder(data) {
+			if ('order_id' in data) {
+				let rendered_order = order_template(data);
+				$("#testapp-content").html(rendered_order);
+			}
+		}
+
+		// Register showOrder() with the JK framework.
+		JKJS_FRAMEWORK.registerRefreshFunction("showOrder",showOrder);
+
+		// Add an item to the order and re-render.
+		function addItem() {
+			$.get("/addItem",{order_id: order_id},showOrder);
+		}
+
+		// Remove an item from the order and re-render.
+		function removeItem(order_id,item_idx) {
+			$.get("/removeItem",{order_id: order_id,item_idx: item_idx},showOrder);
+		}
+
+		// Get the order data and show it.
+		function loadAndShowOrder(order_id) {
+			$.getJSON("/getOrder?order_id="+order_id,showOrder);
+		}
+
+		// Compile the Handlebars template.
+		const tmpl_tag = $("#testapp-order-template");
+		console.log("tmpl_tag is "+JSON.stringify(tmpl_tag));
+		const tmpl_html = $("#testapp-order-template").html();
+		console.log("tmpl_html is "+tmpl_html);
+		order_template = Handlebars.compile(tmpl_html);
+
+		// Set up order action handlers.
+		$(document).on('click','.testapp-add-item',addItem);
+		$(document).on('click','.testapp-remove-item',removeItem);
+
+		// Find the order ID in the URL and assign our
+		// global order_id var that value.
+		const urlParams = new URLSearchParams(window.location.search);
+		order_id = urlParams.get("order_id");
+
+		// Render the initial order.
+		loadAndShowOrder(order_id);
+		</script>
+
+	</body>
+</html>

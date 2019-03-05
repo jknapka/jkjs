@@ -1,0 +1,26 @@
+{
+  "name": "testserver",
+  "version": "1.0.0",
+  "description": "Test server for the JK Javascript Framework.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/jknapka/jkjs.git"
+  },
+  "keywords": [
+    "Node"
+  ],
+  "author": "Joseph Knapka",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jknapka/jkjs/issues"
+  },
+  "homepage": "https://github.com/jknapka/jkjs#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4"
+  }
+}

@@ -156,12 +156,30 @@ JKJS_FRAMEWORK = {
 			inputValue[key_name] = key_id;
 			inputValue[attribute] = value;
 
-			let inputValueJSON = JSON.stringify(inputValue);
-			$.post(serverUrl,inputValueJSON,function(data) {
-				console.log("JSON data is "+JSON.stringify(data));
-				//data = JSON.parse(data);
-				refreshFn(data);
-				targetUpdateFn();
+			//let inputValueJSON = JSON.stringify(inputValue);
+			//$.post(serverUrl,inputValueJSON,function(data) {
+			//	console.log("JSON data is "+JSON.stringify(data));
+			//	//data = JSON.parse(data);
+			//	refreshFn(data);
+			//	targetUpdateFn();
+			//});
+
+			console.log("Submitting AJAX request with data: "+JSON.stringify(inputValue));
+
+			$.ajax({
+				url: serverUrl,
+				data: JSON.stringify(inputValue),
+				type: "POST",
+				contentType: "application/json",
+				dataType: "json",
+				success: function (data) {
+					console.log("JSON data is "+JSON.stringify(data));
+					refreshFn(data);
+					targetUpdateFn();
+				},
+				error: function (xhr, ajaxOptions, thrownError) {
+					console.log("Error in AJAX request: "+thrownError);
+				}
 			});
 		}
 
@@ -363,11 +381,13 @@ JKJS_FRAMEWORK = {
 		function startEditing(target) {
 			dismissOverlay();
 
+			console.log("target: "+JSON.stringify(target));
+
 			// Figure out where the clicked cell is.
 			const off = $(target).offset();
 			const pos = $(target).position();
 
-			const sz = $(target).size();
+			//const sz = $(target).size();
 
 			// Get the editor HTML and JS controller method.
 			const templateName = $(target).attr("data-jkspa-control-id");
