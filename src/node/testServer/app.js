@@ -101,7 +101,6 @@ app.get("/addItem", (req,rsp,next) => {
 	let order = findOrder(req.query.order_id);
 	if (!("error_msg" in order)) {
 		let item = {
-			item_id: next_item_id++,
 			name: "(Click to select)",
 			quantity: 1,
 			price: 0
