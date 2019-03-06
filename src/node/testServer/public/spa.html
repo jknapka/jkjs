@@ -14,15 +14,15 @@
 	  		1) A div where the app behavior will occur (id=testapp-content).
 			2) A Handlebars template to render the app content (id=testapp-order-template).
 			3) Templates for the editor controls used by the JK framework (id=testapp-editors).
-			4) Load Javascript modules the app depends on.
+			4) Load Javascript modules the app depends on (Handlebars, jQuery).
 			5) Custom Javascript code that plugs into the JK framework.
 		-->
 	<style>
-	<!--
+	/*
 	This style ensures that active controls appear with an
 	appropriate cursor and distinctive appearance.
-	-->
-	.jkspa-control {
+	*/
+	.jkjs-control,td.jkjs-control,span.jkjs-control,a.jkjs-control {
 		font-style: italic;
 		cursor: pointer;
 	}
@@ -54,11 +54,11 @@
 				<!--
 				This table's data binding is handled by the JK framework.
 				The critical table attributes are:
-					data-edit-url: the base URL to invoke on the server in
+					data-jkjs-edit-url: the base URL to invoke on the server in
 						order to edit a table cell.
-					data-key-name: the name of the query attribute that
+					data-jkjs-key-name: the name of the query attribute that
 						contains the primary key of the edited item.
-					data-jkspa-refresh-fn: the name of a Javascript function
+					data-jkjs-refresh-fn: the name of a Javascript function
 						that must be invoked here in the UI to re-render
 						the table after an edit is performed. This name
 						is the first argument to the JKJS_FRAMEWORK.registerRefresnFn()
@@ -67,33 +67,33 @@
 				-->
 				<table
 					 border="1"
-					 data-edit-url="/editItem"
-					 data-key-name="item_id"
-					 data-jkspa-refresh-fn="showOrder"
+					 data-jkjs-edit-url="/editItem"
+					 data-jkjs-key-name="item_id"
+					 data-jkjs-refresh-fn="showOrder"
 					>
 					<tr><th>Item</th> <th>Quantity</th> <th>Price</th></tr>
 				{{#each items}}
-					<tr data-key-id="{{../order_id}}+{{@index}}">
+					<tr data-jkjs-key-id="{{../order_id}}+{{@index}}">
 						<!--
-						Each editable <td> must have class "jkspa-control".
+						Each editable <td> must have class "jkjs-control".
 						It also needs the following attributes:
-							data-jkspa-control-id: the ID of one of the control
+							data-jkjs-control-id: the ID of one of the control
 								templates defined below. This determines which
 								editor is shown when the cell is clicked.
-							data-jkspa-data-attribute: the name of the data
+							data-jkjs-data-attribute: the name of the data
 								attribute to be included in the call to the
 								server URL specified above.
 						-->
 						<td
-							data-jkspa-control-id="testapp-item-control"
-							class="jkspa-control"
-							data-jkspa-data-attribute="name"
+							class="jkjs-control"
+							data-jkjs-control-id="testapp-item-control"
+							data-jkjs-data-attribute="name"
 							>
 							{{name}}</td>
 						<td
-							data-jkspa-control-id="testapp-price-control"
-							class="jkspa-control"
-							data-jkspa-data-attribute="quantity"
+							class="jkjs-control"
+							data-jkjs-control-id="testapp-price-control"
+							data-jkjs-data-attribute="quantity"
 							>
 							{{quantity}}</td>
 
@@ -103,33 +103,35 @@
 
 						<!-- This <td> is not editable; it merely invokes an
 						action on the server to remove this row's item from
-						the order. However, it has the jkspa-control class so
+						the order. However, it has the jkjs-control class so
 						that it will be styled consistently with other active
 						controls. -->
-						<td class="jkspa-control" onclick="removeItem({{../order_id}},{{@index}})"> - Remove </td>
+						<td class="jkjs-control" onclick="removeItem({{../order_id}},{{@index}})"> - Remove </td>
 					</tr>
 				{{/each}}
 				</table>
 
 				<!-- This <span>, when clicked, calls the server to add an
-				item to the order. It has class jkspa-control for consistency
+				item to the order. It has class jkjs-control for consistency
 				with other active controls. -->
-				<span class="jkspa-control" onclick="addItem()">+ Add Item</span>
+				<span class="jkjs-control" onclick="addItem()">+ Add Item</span>
 			</div>
 		</script>
 
 		<!--
 	 	Here are the edit controls used by the JK framework.
-		When a table cell with class jkspa-control is clicked, its
-		jkspa-control-id attribute indicates a script tag here,
+		When a table cell with class jkjs-control is clicked, its
+		data-jkjs-control-id attribute indicates a script tag here,
 		whose contents will be used to manifest an editor for
-		the table cell.
+		the table cell. The function names by the data-jkjs-refresh-fn
+		attribute, as registered using JKJS_FRAMEWORK.registerRefreshFn(name,func),
+		will be invoked to re-render the order.
 	   	-->
 		<div id="testapp-controls">
 
 			<script type="text/x-jkjs-control" id="testapp-price-control">
 				<input type="text"
-						data-jkspa-refresh-fn="showOrder">
+						data-jkjs-refresh-fn="showOrder">
 				</input>
 			</script>
 
@@ -137,7 +139,7 @@
 					type="x-html/x-jkjs-control">
 				<select name="name"
 						class="singleselectfield"
-						data-jkspa-refresh-fn="showOrder">
+						data-jkjs-refresh-fn="showOrder">
 					<option value="food">food</option>
 					<option value="drink">drink</option>
 					<option value="toy">toy</option>
@@ -188,19 +190,19 @@
 			$.get("/removeItem",{order_id: order_id,item_idx: item_idx},showOrder);
 		}
 
-		// Get the order data and show it.
+		// Get the order data for the given order_id and show it.
 		function loadAndShowOrder(order_id) {
 			$.getJSON("/getOrder?order_id="+order_id,showOrder);
 		}
 
 		// Compile the Handlebars template.
 		const tmpl_tag = $("#testapp-order-template");
-		console.log("tmpl_tag is "+JSON.stringify(tmpl_tag));
 		const tmpl_html = $("#testapp-order-template").html();
-		console.log("tmpl_html is "+tmpl_html);
 		order_template = Handlebars.compile(tmpl_html);
 
-		// Set up order action handlers.
+		// Set up order action handlers. We must do this at the
+		// document level because when this code runs the order
+		// template has not yet been rendered.
 		$(document).on('click','.testapp-add-item',addItem);
 		$(document).on('click','.testapp-remove-item',removeItem);
 

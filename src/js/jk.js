@@ -8,7 +8,7 @@ JKJS_FRAMEWORK = {
 	refreshFns : {},
 
 	// Register a refresh function with a given name.
-	// These functions are referred to by data-jkspa-refresh-fn
+	// These functions are referred to by data-jkjs-refresh-fn
 	// attributes on <table> tags in the HTML.
 	registerRefreshFunction: function (fnName,fn) {
 		this.refreshFns[fnName] = fn;
@@ -21,7 +21,7 @@ JKJS_FRAMEWORK = {
 
 	toggleHelp: function (evt) {
 		let helpDiv = $(".help-div");
-		let helpToggle = $(".jkspa-help-toggle");
+		let helpToggle = $(".jkjs-help-toggle");
 		console.log("help display is " + helpDiv.css("display"));
 		console.log("isHelpActive is "+this.isHelpActive+" "+JKJS_FRAMEWORK.isHelpActive);
 		if (helpDiv.css("display") == "none") {
@@ -101,24 +101,35 @@ JKJS_FRAMEWORK = {
 			return val;
 		}
 
-		// Given a <td> element, get the data-edit-url attribute
+		const TABLE_EDIT_URL_ATTR = "data-jkjs-edit-url";
+		const KEY_ID_ATTR = "data-jkjs-key-id";
+		const KEY_NAME_ATTR = "data-jkjs-key-name";
+		const CONTROL_ID_ATTR = "data-jkjs-control-id";
+		const CONTROL_FN_ATTR = "data-jkjs-control-fn";
+		const REFRESH_FN_ATTR = "data-jkjs-refresh-fn";
+		const DATA_ATTR_ATTR = "data-jkjs-data-attribute";
+
+		const EDITOR_ID = "#jkjs-editor";
+		const OVERLAY_ID = "#jkjs-overlay";
+
+		// Given a <td> element, get the data-jkjs-edit-url attribute
 		// of the surrounding <tr> or <table>.
 		function getServerUrlFromTD(td) {
-			return getTrOrTableAttribFromTD(td,"data-edit-url");
+			return getTrOrTableAttribFromTD(td,TABLE_EDIT_URL_ATTR);
 		}
 
 		// Given a <td> element, find the ID of the server data object
-		// it is associated with. That ID is encoeded in the data-key-id
+		// it is associated with. That ID is encodeded in the data-jkjs-key-id
 		// attribute of the surrounding <tr> element.
 		function getKeyIdFromTD(originalCell) {
-			return getTrAttribFromTd(originalCell,"data-key-id");
+			return getTrAttribFromTd(originalCell,KEY_ID_ATTR);
 		}
 
 		// Get the name of the data table primary key from either the
 		// surrounding <tr> or the surrounding <table> element of
 		// a <td> element.
 		function getKeyNameFromTD(originalCell) {
-			return getTrOrTableAttribFromTD(originalCell,"data-key-name");
+			return getTrOrTableAttribFromTD(originalCell,KEY_NAME_ATTR);
 		}
 
 		// Commit an edit to the server via an AJAX request,
@@ -225,19 +236,19 @@ JKJS_FRAMEWORK = {
 			function commitChange(editNextCell = false) {
 				const key_id = getKeyIdFromTD(target);
 				const key_name = getKeyNameFromTD(target);
-				const inputEl = $("#jkjs-editor");
+				const inputEl = $(EDITOR_ID);
 				const value = inputEl.val().trim();
 				const url = getServerUrlFromTD(target);
-				$("#jkjs-overlay").remove();
+				$(OVERLAY_ID).remove();
 				commitChangeToServer(url,key_name,key_id,dataAttribute,value,refreshFn,getTargetUpdater(target,editNextCell));
 			}
 
 			// Handle keystrokes in the input field. ESC aborts, TAB commits.
-			$("#jkjs-editor").keydown(function (evt) {
+			$(EDITOR_ID).keydown(function (evt) {
 				if (evt.which == 27) {
 					// ESC - stop editing.
 					evt.stopPropagation(); // No parent elements should see this.
-					$("#jkjs-overlay").remove(); // Remove the editor without committing the change.
+					$(OVERLAY_ID).remove(); // Remove the editor without committing the change.
 				}
 				if (evt.which == 9) {
 					// TAB - commit and edit next cell.
@@ -252,16 +263,16 @@ JKJS_FRAMEWORK = {
 					commitChange();
 				}
 			});
-			$("#jkjs-editor").keyup(function (evt) {
+			$(EDITOR_ID).keyup(function (evt) {
 				if (evt.which == 9) {
 					// TAB - don't let the default taborder happen.
 					evt.preventDefault();
 				}
 			});
 
-			$("#jkjs-editor").val(target.html().trim());
-			$("#jkjs-editor").select();
-			$("#jkjs-editor").focus();
+			$(EDITOR_ID).val(target.html().trim());
+			$(EDITOR_ID).select();
+			$(EDITOR_ID).focus();
 		}
 
 		// This is the "control" function for list-selection table cells.
@@ -278,28 +289,28 @@ JKJS_FRAMEWORK = {
 				// We should also have a "build JSON request" function parameter.
 				const key_id = getKeyIdFromTD(target);
 				const key_name = getKeyNameFromTD(target);
-				const inputEl = $("#jkjs-editor option:selected");
+				const inputEl = $(EDITOR_ID+" option:selected");
 				const value = inputEl.val();
 				const url = getServerUrlFromTD(target);
-				$("#jkjs-overlay").remove();
+				$(OVERLAY_ID).remove();
 				commitChangeToServer(url,key_name,key_id,dataAttribute,value,refreshFn,getTargetUpdater(target,editNextCell));
 			}
 
-			$("#jkjs-editor").click(function(evt) {
+			$(EDITOR_ID).click(function(evt) {
 				evt.stopPropagation();
 			});
 
-			$("#jkjs-editor").change(function (evt) {
+			$(EDITOR_ID).change(function (evt) {
 				commitChange();
-				$("#jkjs-overlay").remove();
+				$(OVERLAY_ID).remove();
 			});
 
 			// Handle keystrokes in the input field. ESC aborts, TAB commits.
-			$("#jkjs-editor").keydown(function (evt) {
+			$(EDITOR_ID).keydown(function (evt) {
 				if (evt.which == 27) {
 					// ESC - stop editing.
 					evt.stopPropagation(); // No parent elements should see this.
-					$("#jkjs-overlay").remove(); // Remove the editor without committing the change.
+					$(OVERLAY_ID).remove(); // Remove the editor without committing the change.
 				}
 				if (evt.which == 9) {
 					// TAB - commit and edit next cell.
@@ -314,7 +325,7 @@ JKJS_FRAMEWORK = {
 					commitChange();
 				}
 			});
-			$("#jkjs-editor").keyup(function (evt) {
+			$(EDITOR_ID).keyup(function (evt) {
 				if (evt.which == 9) {
 					// TAB - don't let the default taborder happen.
 					evt.preventDefault();
@@ -322,9 +333,9 @@ JKJS_FRAMEWORK = {
 			});
 
 			const curVal = target.html();
-			const selVal = getSelectionValueForOptionText($("#jkjs-editor"),curVal);
-			$("#jkjs-editor").val(selVal);
-			$("#jkjs-editor").focus();
+			const selVal = getSelectionValueForOptionText($(EDITOR_ID),curVal);
+			$(EDITOR_ID).val(selVal);
+			$(EDITOR_ID).focus();
 		}
 
 		// Given a <select> wrapper and the text of an <option> tag
@@ -350,7 +361,7 @@ JKJS_FRAMEWORK = {
 
 		// If an overlay editor is open, close it.
 		function dismissOverlay() {
-			const overlay = $("#jkjs-overlay");
+			const overlay = $(OVERLAY_ID);
 			if (overlay.length > 0) {
 				overlay.remove();
 			}
@@ -366,7 +377,7 @@ JKJS_FRAMEWORK = {
 
 		// Given an editor element, return the default controller
 		// function for that element. This is used only if the editor
-		// element does not have a data-jkspa-js-controller attribute
+		// element does not have a data-jkjs-controller attribute
 		// naming the controller function.
 		function getDefaultControllerForElement(el) {
 			if ($(el).is("select")) {
@@ -390,13 +401,13 @@ JKJS_FRAMEWORK = {
 			//const sz = $(target).size();
 
 			// Get the editor HTML and JS controller method.
-			const templateName = $(target).attr("data-jkspa-control-id");
+			const templateName = $(target).attr(CONTROL_ID_ATTR);
 			if (typeof templateName == "undefined") {
 				return;
 			}
 			const controlElem = $.parseHTML($("#"+templateName).html().trim());
 			const controlWrapper = $(controlElem);
-			let funcName = $(controlElem).attr("data-jkspa-js-controller");
+			let funcName = $(controlElem).attr(CONTROL_FN_ATTR);
 			if (typeof funcName == "undefined") {
 				funcName = getDefaultControllerForElement(controlElem);
 			}
@@ -406,11 +417,11 @@ JKJS_FRAMEWORK = {
 			}
 
 			// Get the refresh function for the table.
-			const refreshFnName = getTrOrTableAttribFromTD($(target),"data-jkspa-refresh-fn");
+			const refreshFnName = getTrOrTableAttribFromTD($(target),REFRESH_FN_ATTR);
 			const refreshFn = JKJS_FRAMEWORK.getRefreshFunction(refreshFnName);
 
 			// Get the data attribute name.
-			const  dataAttrib = $(target).attr("data-jkspa-data-attribute");
+			const  dataAttrib = $(target).attr(DATA_ATTR_ATTR);
 
 			// Position the div and the control.
 			const ndiv = $('<div id="jkjs-overlay"></div>');
@@ -438,9 +449,9 @@ JKJS_FRAMEWORK = {
 
 		// Set the click handler on all JKJS control fields.
 		// This actually binds a handler on the document that
-		// will get called for any element with the jkspa-control
+		// will get called for any element with the jkjs-control
 		// class.
-		$(document).on('click','.jkspa-control',jkJsHandleClick);
+		$(document).on('click','.jkjs-control',jkJsHandleClick);
 
 	}
 

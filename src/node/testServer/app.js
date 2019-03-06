@@ -111,10 +111,19 @@ app.get("/addItem", (req,rsp,next) => {
 });
 
 // Edit the name or quantity of an order item.
+//
+// This implements the server API required by the JK framework.
 // The UI sends item_id="order_id+item_index", and
 // either a name or quantity value to set in the
-// indicated item.
+// indicated item. The server must perform the appropriate
+// data update and then return the complete order in
+// JSON format to the client. On the client side,
+// the configured renderer function must be able to
+// render the returned JSON as HTML, with all of the
+// attributes the JK framework requires (as documented in
+// public/spa.html).
 app.post("/editItem", (req,rsp,next) => {
+	console.log("POST /editItem: "+JSON.stringify(req.body));
 	let order_and_item = req.body.item_id.split("+"); // "order_id+item_index"
 	let order_id = parseInt(order_and_item[0]);
 	let item_idx = parseInt(order_and_item[1]);
