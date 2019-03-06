@@ -159,13 +159,23 @@ app.put("/editItem", (req,rsp,next) => {
 // The query contains the order_id and the item_idx
 // as separate arguments.
 app.delete("/removeItem", (req,rsp,next) => {
-	console.log("Trying to DELETE "+req.body.order_id+"+"+req.body.item_idx);
-	let order = findOrder(parseInt(req.body.order_id));
-	let result = {error_msg: "No such item "+req.body.order_id+"+"+req.body.item_idx};
+	let order_id = req.query.order_id;
+	let item_idx = req.query.item_idx;
+	if (typeof(order_id) == "undefined") {
+		// Params passed in body instead. This is strictly
+		// not OK, but we'll allow it. (Servers are supposed
+		// to ignore the body of DELETE requests; the URI is
+		// supposed to contain all identifying info for the
+		// resource to be deleted. Compliance varies on both
+		// the client and server sides, apparently.)
+		order_id = req.body.order_id;
+		item_idx = req.body.item_idx;
+	}	
+	let order = findOrder(parseInt(order_id));
+	let result = {error_msg: "No such item "+order_id+"+"+item_idx};
 	if (!("error_msg" in order)) {
-		let item_idx = parseInt(req.body.item_idx);
 		if (!("error_msg" in order)) {
-			order.items.splice(item_idx,1);
+			order.items.splice(parseInt(item_idx),1);
 		}
 		result = order;
 	}

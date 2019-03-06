@@ -21,20 +21,20 @@ more convenient, since usually the key name is the same for all rows
 in the table. Each `<td>` tag containing editable content needs a
 `data-jkjs-data-attribute` attribute indicating the name of the
 data item (essentially, the table column) to update when the cell is
-edited. The URL invoked on the server will be a POST of the form
+edited. The URL invoked on the server will be a PUT of the form
 
 ```
     /baseUrl?keyName=keyId&attributeName=newValue
 ```
 
-(except that the parameters will be sent in the POST body, not
+(except that the parameters will be sent in the PUT body, not
 in the query).
 
 When a `<td>` element is clicked/tapped, the handler looks for a
 `data-jkjs-control-id` attribute on the `<td>`. If found, it
-takes the value of that attribute to be the name of a template
+takes the value of that attribute to be the HTML ID of a template
 element to manifest as an editor control overlaid atop the `<td>`.
-The editor templates are realized as `<script type="text/jkjs-template">`
+The editor templates are realized as `<script type="text/jkjs-template" id="whatever">`
 tags whose contents are the editor's HTML code. Each template
 tag may also have an associated Javascript controller function,
 whose name is specified by a `data-jkjs-controller` attribute
@@ -62,4 +62,5 @@ level if different rows require different render functions.) The
 render function is passed the JSON data returned from the server's
 update call.
 
-In the near future I will add a brief example app.
+The `src/node/testServer` directory contains a Node/Express app
+that will serve a test page at `http://localhost:3000/spa.html?order_id=42`.

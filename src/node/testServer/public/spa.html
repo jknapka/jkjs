@@ -202,11 +202,9 @@
 		// we should use a DELETE request.
 		function removeItem(order_id,item_idx) {
 			$.ajax({
-				url: "/removeItem",
-				data: JSON.stringify({order_id:order_id,item_idx:item_idx}),
+				url: "/removeItem?order_id="+order_id+"&item_idx="+item_idx,
+				data: {order_id:order_id,item_idx:item_idx},
 				type: "DELETE",
-				contentType: "application/json",
-				dataType: "json",
 				success: showOrder,
 				error: function (xhr, ajaxOptions, thrownError) {
 					console.log("Error in AJAX request: "+thrownError);
