@@ -167,20 +167,21 @@ JKJS_FRAMEWORK = {
 			inputValue[key_name] = key_id;
 			inputValue[attribute] = value;
 
-			//let inputValueJSON = JSON.stringify(inputValue);
-			//$.post(serverUrl,inputValueJSON,function(data) {
-			//	console.log("JSON data is "+JSON.stringify(data));
-			//	//data = JSON.parse(data);
-			//	refreshFn(data);
-			//	targetUpdateFn();
-			//});
-
 			console.log("Submitting AJAX request with data: "+JSON.stringify(inputValue));
 
+			// Per the HTTP spec, since we are changing the state of a
+			// resource with a known URL, and this operation is idempotent
+			// (we can repeat the operation without further changing the
+			// resource's state), we should use a PUT request.
+			//
+			// TO DO: the choice of PUT vs POST should probably be
+			// made via a table or row parameter, with PUT being the
+			// default since we are typically editing an existing
+			// table row in an idempotent fashion.
 			$.ajax({
 				url: serverUrl,
 				data: JSON.stringify(inputValue),
-				type: "POST",
+				type: "PUT",
 				contentType: "application/json",
 				dataType: "json",
 				success: function (data) {

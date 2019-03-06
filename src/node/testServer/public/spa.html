@@ -180,17 +180,44 @@
 		// Register showOrder() with the JK framework.
 		JKJS_FRAMEWORK.registerRefreshFunction("showOrder",showOrder);
 
-		// Add an item to the order and re-render.
+		// Add an item to the order and re-render. Per the HTTP spec,
+		// since we are adding a resource whose URL will be assigned
+		// by the server, we should use a POST request.
 		function addItem() {
-			$.get("/addItem",{order_id: order_id},showOrder);
+			$.ajax({
+				url: "/addItem",
+				data: JSON.stringify({order_id:order_id}),
+				type: "POST",
+				contentType: "application/json",
+				dataType: "json",
+				success: showOrder,
+				error: function (xhr, ajaxOptions, thrownError) {
+					console.log("Error in AJAX request: "+thrownError);
+				}
+			});
 		}
 
-		// Remove an item from the order and re-render.
+		// Remove an item from the order and re-render. Per the HTTP
+		// spec, since we are removing a resource with a defined URL,
+		// we should use a DELETE request.
 		function removeItem(order_id,item_idx) {
-			$.get("/removeItem",{order_id: order_id,item_idx: item_idx},showOrder);
+			$.ajax({
+				url: "/removeItem",
+				data: JSON.stringify({order_id:order_id,item_idx:item_idx}),
+				type: "DELETE",
+				contentType: "application/json",
+				dataType: "json",
+				success: showOrder,
+				error: function (xhr, ajaxOptions, thrownError) {
+					console.log("Error in AJAX request: "+thrownError);
+				}
+			});
 		}
 
 		// Get the order data for the given order_id and show it.
+		// Per the HTTP spec, since we are retrieving a resource with
+		// a known URL and this operation has no side-effects, we
+		// should use a GET request.
 		function loadAndShowOrder(order_id) {
 			$.getJSON("/getOrder?order_id="+order_id,showOrder);
 		}

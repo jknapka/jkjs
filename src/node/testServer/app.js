@@ -78,7 +78,7 @@ app.get("/items", (req,rsp,next) => {
 });
 
 // Create a new, empty order.
-app.get("/newOrder", (req,rsp,next) => {
+app.post("/newOrder", (req,rsp,next) => {
 	let order_id = next_order_id++;
 	let order = {
 		order_id: order_id,
@@ -97,8 +97,8 @@ app.get("/getOrder", (req,rsp,next) => {
 
 // Add a new, unspecified item to an order.
 // The query contains the order_id.
-app.get("/addItem", (req,rsp,next) => {
-	let order = findOrder(req.query.order_id);
+app.post("/addItem", (req,rsp,next) => {
+	let order = findOrder(req.body.order_id);
 	if (!("error_msg" in order)) {
 		let item = {
 			name: "(Click to select)",
@@ -122,8 +122,8 @@ app.get("/addItem", (req,rsp,next) => {
 // render the returned JSON as HTML, with all of the
 // attributes the JK framework requires (as documented in
 // public/spa.html).
-app.post("/editItem", (req,rsp,next) => {
-	console.log("POST /editItem: "+JSON.stringify(req.body));
+app.put("/editItem", (req,rsp,next) => {
+	console.log("PUT /editItem: "+JSON.stringify(req.body));
 	let order_and_item = req.body.item_id.split("+"); // "order_id+item_index"
 	let order_id = parseInt(order_and_item[0]);
 	let item_idx = parseInt(order_and_item[1]);
@@ -158,11 +158,12 @@ app.post("/editItem", (req,rsp,next) => {
 // Remove an item from an order.
 // The query contains the order_id and the item_idx
 // as separate arguments.
-app.get("/removeItem", (req,rsp,next) => {
-	let order = findOrder(parseInt(req.query.order_id));
-	let result = {error_msg: "No such item "+req.query.order_id+"+"+req.query.item_idx};
+app.delete("/removeItem", (req,rsp,next) => {
+	console.log("Trying to DELETE "+req.body.order_id+"+"+req.body.item_idx);
+	let order = findOrder(parseInt(req.body.order_id));
+	let result = {error_msg: "No such item "+req.body.order_id+"+"+req.body.item_idx};
 	if (!("error_msg" in order)) {
-		let item_idx = parseInt(req.query.item_idx);
+		let item_idx = parseInt(req.body.item_idx);
 		if (!("error_msg" in order)) {
 			order.items.splice(item_idx,1);
 		}
