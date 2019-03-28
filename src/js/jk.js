@@ -162,7 +162,7 @@ JKJS_FRAMEWORK = {
 		//		called.
 		function commitChangeToServer(serverUrl,key_name,key_id,attribute,value,refreshFn,targetUpdateFn) {
 			const inputValue = { };
-			// IMO this is a stupid misfeature in Javascript: variables
+			// IMO this is an annoying misfeature in Javascript: variables
 			// cannot be used as attribute names in object literals.
 			inputValue[key_name] = key_id;
 			inputValue[attribute] = value;
@@ -207,7 +207,7 @@ JKJS_FRAMEWORK = {
 		// Get a target-update function for a given target. The resulting
 		// function is called after the document is refreshed and, if
 		// requested, moves the editor to the next cell in the table.
-		// We must do this because refreshing the table completely destroys
+		// We must do this because refreshing the table may completely destroy
 		// and re-creates the affected DOM, so we cannot continue to use
 		// any reference to the cell that we were using before the refresh.
 		function getTargetUpdater(target,editNextCell=false) {
@@ -286,8 +286,14 @@ JKJS_FRAMEWORK = {
 
 			// Update the underlying table with the editor value.
 			function commitChange(editNextCell=false) {
-				// The "edit complete" action should be a parameter to the controller.
-				// We should also have a "build JSON request" function parameter.
+				// It annoys me that I don't see a super-clean way to factor commitChange()
+				// out of these controller functions. We need access to the enclosing
+				// scope, which means a higher-level version would need a bunch of
+				// parameters. [Note, that's obviously the right thing to do, but
+				// I'm not going to take the trouble right now.] This is a case where
+				// something like Common Lisp's dynamic scope or (pretty similarly) Tcl/Tk's
+				// "uplevel" would be tempting to use (but also horribly unmaintainable and
+				// therefore wrong).
 				const key_id = getKeyIdFromTD(target);
 				const key_name = getKeyNameFromTD(target);
 				const inputEl = $(EDITOR_ID+" option:selected");
@@ -355,6 +361,8 @@ JKJS_FRAMEWORK = {
 		// A map of control-handler function names to their
 		// respective functions. This allows us to refer to
 		// control functions by name in the HTML.
+		// TO DO: we need to be able to register new controllers,
+		// like we can register new renderers.
 		const controlHandlers = {
 			"jkspaTextController":jkspaTextController,
 			"jkspaSelectController":jkspaSelectController
@@ -439,10 +447,10 @@ JKJS_FRAMEWORK = {
 			ndiv.css("zindex", 100);
 			ndiv.css("background-color", "#FFFFFF");
 			ndiv.css("padding", "5px");
-			ndiv.css("top", off.top-5);
-			ndiv.css("left", off.left-5);
-			ndiv.css("max-height", $(target).height());
-			ndiv.css("max-width", $(target).width());
+			ndiv.css("top", off.top);
+			ndiv.css("left", off.left);
+			ndiv.css("max-height", $(target).height()*2.0);
+			ndiv.css("max-width", $(target).width()*2.0);
 
 			// Configure the control.
 			func($(target),controlElem,dataAttrib,refreshFn);
