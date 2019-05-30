@@ -1,4 +1,5 @@
 # The JK Javascript framework.
+Just what the world needed! Another half-baked JavaScript databinding framework.
 
 I needed editable, persistent HTML data tables for a small webapp project.
 It seemed obvious that the way to implement that was via an AJAX-y mechanism.
